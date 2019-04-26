@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  mongo:
+    image: 'mongo:latest'
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: conradoroot
+      MONGO_USER: conrado
+      MONGO_PASSWORD: conrado
+      MONGO_DATABASE: noderest
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - noderest-net
+    command: --auth
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=conradoroot
+    networks:
+      - noderest-net
+
+  rest:
+    depends_on:
+      - mongo
+    image: 'node:10-alpine'
+    user: 'node'
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./:/home/node/app
+    expose:
+      - '3000'
+    ports:
+      - '3000:3000'
+    command: 'npm start'
+    networks:
+      - noderest-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - '9090:9090'
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - noderest-net
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3100:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - noderest-net
+
+volumes:
+  mongo_data:
+  grafana_data:
+
+networks:
+  noderest-net:
