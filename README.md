@@ -2,6 +2,6 @@
 
 Uma aplicação incremental com base em Node+Express+MongoDB.
 
-Monitaração com Prometheus+Grafana.
+Monitoração com Prometheus+Grafana.
 
 Licença MIT
