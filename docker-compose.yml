@@ -14,8 +14,34 @@ services:
     volumes:
       - mongo_data:/data/db
     networks:
-      - noderest-net
+      - mongo-net
     command: --auth
+
+  rest:
+    image: 'noderest'
+    working_dir: /home/node
+    environment:
+      - NODE_ENV=development
+      - MONGO_USER=conrado
+      - MONGO_PASSWORD=conrado
+    volumes:
+      - ./:/home/node
+    expose:
+      - '3000'
+    command: './start.sh'
+    networks:
+      - nginx-net
+      - mongo-net
+
+  proxy-reverso:
+    image: nginx:latest
+    volumes:
+      - ./proxy_reverso/:/etc/nginx/conf.d/:ro
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - nginx-net
 
   mongo-express:
     image: mongo-express
@@ -25,25 +51,7 @@ services:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=conradoroot
     networks:
-      - noderest-net
-
-  rest:
-    depends_on:
-      - mongo
-    image: 'node:10-alpine'
-    user: 'node'
-    working_dir: /home/node/app
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./:/home/node/app
-    expose:
-      - '3000'
-    ports:
-      - '3000:3000'
-    command: 'npm start'
-    networks:
-      - noderest-net
+      - mongo-net
 
   prometheus:
     image: prom/prometheus:latest
@@ -54,7 +62,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
-      - noderest-net
+      - nginx-net
 
   grafana:
     image: grafana/grafana:latest
@@ -63,11 +71,12 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
     networks:
-      - noderest-net
+      - nginx-net
 
 volumes:
   mongo_data:
   grafana_data:
 
 networks:
-  noderest-net:
+  mongo-net:
+  nginx-net:

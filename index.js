@@ -21,8 +21,8 @@ register.registerMetric(counter);
 /** ********************************************************************************************* */
 const { MONGODB_HOST = 'noderest_mongo_1', MONGODB_PORT = '27017', MONGODB_DATABASE = 'noderest' } = process.env;
 
-const user = encodeURIComponent('conrado');
-const pass = encodeURIComponent('conrado');
+const user = encodeURIComponent(process.env.MONGO_USER);
+const pass = encodeURIComponent(process.env.MONGO_PASSWORD);
 const authMechanism = 'DEFAULT';
 const url = f('mongodb://%s:%s@%s:%s/%s?authMechanism=%s', user, pass, MONGODB_HOST, MONGODB_PORT, MONGODB_DATABASE, authMechanism);
 
